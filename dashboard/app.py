@@ -10,12 +10,16 @@ from sklearn.metrics import accuracy_score
 st.set_page_config(page_title="Churn Predictor", layout="wide")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_PATH = os.path.join(BASE_DIR, "data", "cleaned", "telco_cleaned.csv")
+DATA_PATH = os.path.join(BASE_DIR, "data", "raw", "telco.csv")
 
 # ── Train model once ──────────────────────────────────────────────────────────
 @st.cache_resource
 def train_model():
     df = pd.read_csv(DATA_PATH)
+    df['TotalCharges'] = df['TotalCharges'].replace(' ', float('nan'))
+    df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+    df = df.dropna(subset=['TotalCharges'])
+    df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
 
     features = ["tenure", "MonthlyCharges", "TotalCharges",
                 "Contract", "PaymentMethod", "InternetService",
